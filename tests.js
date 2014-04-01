@@ -1,6 +1,6 @@
 test("select test", function(){
     var test_data = [1, 2, 3, 4, 5];
-    var result = JSIQ.from(test_data).where(function(x){return x>2;}).select(function(x){return x*x}).all();
+    var result = jsiq.from(test_data).where(function(x){return x>2;}).select(function(x){return x*x}).all();
     deepEqual(result, [9,16,25], "Passed");
 });
 
@@ -16,6 +16,6 @@ test("order test", function(){
                          {"sid":6,"name":"zhao"},
                          {"sid":7,"name":"li"}];
 
-    var result = JSIQ.from(test_data).orderBy(function(i){return i.sid}).all();
+    var result = jsiq.from(test_data).orderBy(function(i){return i.sid}, jsiq.ascending).all();
     deepEqual(result, expected_data, "Passed");
 });
