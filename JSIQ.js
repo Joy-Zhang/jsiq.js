@@ -1,25 +1,23 @@
-var JSIQ = function(){
+(function(){
+
+    this.jsiq = {};
+
+    var root = this.jsiq;
 
 
 
-    this.from = function(list){
-        return new JSIQ.Query(list);
+    root.from = function(list){
+        return new Query(list);
     }
 
-    var OrderEnum = function(value){
+    var Order = function(value){
         this.value = value;
     }
 
+    root.ascending = new Order("ascending");
+    root.descending = new Order("descending");
 
-    this.Order = {
-        "ascending" : new OrderEnum("ascending"),
-        "descending" : new OrderEnum("descending"),
-        "equals" : function(o1, o2) {
-                       return o1.value === o2.value;
-                   }
-    }
-
-    this.Query = function(list){
+    var Query = function(list){
         if(typeof(list) !== typeof([])) throw "Not array";
 
         var result = list;
@@ -64,8 +62,8 @@ var JSIQ = function(){
             if(typeof(keySelector) !== typeof(Function)) return null;
 
             if(order === undefined)
-                order = JSIQ.Order.ascending;
-            if(!order instanceof OrderEnum) return null;
+                order = root.ascending;
+            if(!order instanceof Order) return null;
 
             if(comparer === undefined)
                 comparer = defaultComparer;
@@ -77,9 +75,9 @@ var JSIQ = function(){
             for(index in result)
                 tempOrder.push({"element":keySelector(result[index]),"index":index});
             tempOrder = tempOrder.sort(function(e1, e2){
-                if(JSIQ.Order.equals(order, JSIQ.Order.ascending))
+                if(order.value === root.ascending.value)
                     return comparer(e1.element, e2.element);
-                if(JSIQ.Order.equals(order, JSIQ.Order.descending))
+                if(order.value, root.descending.value)
                     return -comparer(e1.element, e2.element);
             });
             var tempResult = [];
@@ -90,9 +88,10 @@ var JSIQ = function(){
         }
     }
 
-    this.query = function(query){
+    jsiq.query = function(query){
 
     }
 
-};
-JSIQ = new JSIQ();
+
+
+}).call(this);
