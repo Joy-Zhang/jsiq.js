@@ -1,8 +1,8 @@
 (function(){
 
-    this.jsiq = {};
+    this.JSIQ = {};
 
-    var root = this.jsiq;
+    var root = this.JSIQ;
 
 
 
@@ -88,8 +88,65 @@
         }
     }
 
-    jsiq.query = function(query){
+    var analyzeClause = function(query) {
+        var clause = {};
 
+        var match = null;
+        var selectPattern = /select\s+(.*)/;
+        match = selectPattern.exec(query);
+        if(match === null)
+            return null;
+
+        var fromPattern = /(.*\S)\s+from\s+(.*)/;
+        query = match[1];
+        match = fromPattern.exec(query);
+        if(match === null)
+            return null;
+
+        clause.select = match[1];
+        var inPattern = /(\S*)\s+in\s+(.*)/;
+        query = match[2];
+        match = inPattern.exec(query);
+        if(match === null)
+            return null;
+        clause.parameter = match[1];
+
+        var wherePattern = /(\S*)\s+where\s+(.*)/;
+        query = match[2];
+        match = wherePattern.exec(query);
+        if(match === null) {
+            match = /(\S*)/.exec(query);
+            if(match === null)
+                return null;
+            clause.array = match[1];
+            return clause;
+        }
+        clause.array = match[1];
+
+        var orderByPattern = /(.*\S)\s+order by\s+(\S*)\s+(ascending|descending)?/;
+        query = match[2];
+        match = orderByPattern.exec(query);
+        if(match === null) {
+            match = /(.*\S)/.exec(query);
+            if(match === null)
+                return null;
+            clause.where = match[1];
+            return clause;
+        }
+        clause.where = match[1];
+        clause.orderBy = match[2];
+        clause.order = match[3];
+        return clause;
+    }
+
+    root.query = function(query){
+        var clause = analyzeClause(query);
+        if(clause === null)
+            return null;
+        var execution = new Query(eval(clause.array));
+        execution.where(new Function(clause.parameter, "return " + clause.where));
+        execution.select(new Function(clause.parameter, "return " + clause.select));
+        return execution.all();
     }
 
 
