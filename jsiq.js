@@ -4,20 +4,24 @@
 
     var root = this.JSIQ;
 
+    var importedArrays = {};
 
+    root.import = function(name, array) {
+        importedArrays[name] = array;
+    }
 
-    root.from = function(list){
+    root.from = function(list) {
         return new Query(list);
     }
 
-    var Order = function(value){
+    var Order = function(value) {
         this.value = value;
     }
 
     root.ascending = new Order("ascending");
     root.descending = new Order("descending");
 
-    var Query = function(list){
+    var Query = function(list) {
         if(typeof(list) !== typeof([])) throw "Not array";
 
         var result = list;
@@ -139,11 +143,14 @@
         return clause;
     }
 
-    root.query = function(query){
+    root.query = function(query) {
         var clause = analyzeClause(query);
         if(clause === null)
             return null;
-        var execution = new Query(eval(clause.array));
+        var array = importedArrays[clause.array];
+        if(array === undefined)
+            array = eval(clause.array);
+        var execution = new Query(array);
         execution.where(new Function(clause.parameter, "return " + clause.where));
         execution.select(new Function(clause.parameter, "return " + clause.select));
         return execution.all();
