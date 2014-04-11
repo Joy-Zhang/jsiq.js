@@ -18,6 +18,9 @@
         this.value = value;
     }
 
+
+
+
     root.ascending = new Order("ascending");
     root.descending = new Order("descending");
 
@@ -81,7 +84,7 @@
             tempOrder = tempOrder.sort(function(e1, e2){
                 if(order.value === root.ascending.value)
                     return comparer(e1.element, e2.element);
-                if(order.value, root.descending.value)
+                if(order.value === root.descending.value)
                     return -comparer(e1.element, e2.element);
             });
             var tempResult = [];
@@ -94,52 +97,75 @@
 
     var analyzeClause = function(query) {
         var clause = {};
+        var index = ["select", "parameter", "array", "where", "orderBy", "order"]
+
 
         var match = null;
         var selectPattern = /select\s+(.*)/;
         match = selectPattern.exec(query);
         if(match === null)
             return null;
+        query = match[1];
 
         var fromPattern = /(.*\S)\s+from\s+(.*)/;
-        query = match[1];
         match = fromPattern.exec(query);
         if(match === null)
             return null;
-
-        clause.select = match[1];
-        var inPattern = /(\S*)\s+in\s+(.*)/;
+        clause[index.shift()] = match[1];
         query = match[2];
+
+        var inPattern = /(\S*)\s+in\s+(.*)/;
         match = inPattern.exec(query);
         if(match === null)
             return null;
-        clause.parameter = match[1];
+        clause[index.shift()] = match[1];
+        query = match[2];
 
         var wherePattern = /(\S*)\s+where\s+(.*)/;
-        query = match[2];
         match = wherePattern.exec(query);
-        if(match === null) {
-            match = /(\S*)/.exec(query);
-            if(match === null)
-                return null;
-            clause.array = match[1];
-            return clause;
+        if(match !== null) {
+            clause[index.shift()] = match[1];
+            query = match[2];
         }
-        clause.array = match[1];
+        else {
+            index.splice(1, 1);//delete where
+        }
 
-        var orderByPattern = /(.*\S)\s+order by\s+(\S*)\s+(ascending|descending)?/;
-        query = match[2];
+
+        var orderByPattern = null;
+        if(index[0] === "array")
+            orderByPattern = /(\S*)\s+order by\s+(.*)/;
+        else if(index[0] === "where")
+            orderByPattern = /(.*\S)\s+order by\s+(.*)/
+        /*
+        if(index[current] === "array")
+            orderByPattern = /(\S*)\s+order by\s+(\S*)\s+(ascending|descending)?/;
+        else
+            orderByPattern = /(.*\S)\s+order by\s+(\S*)\s+(ascending|descending)?/*/
+
         match = orderByPattern.exec(query);
-        if(match === null) {
-            match = /(.*\S)/.exec(query);
-            if(match === null)
-                return null;
-            clause.where = match[1];
-            return clause;
+        if(match !== null) {
+            clause[index.shift()] = match[1];
+            query = match[2];
         }
-        clause.where = match[1];
-        clause.orderBy = match[2];
-        clause.order = match[3];
+        else {
+            index.splice(1, 2);
+        }
+
+        var endPattern = null;
+        if(index[0] === "array")
+            endPattern = /(\S*)/;
+        else if(index[0] === "where")
+            endPattern = /(.*\S)/
+        else if(index[0] === "orderBy")
+            endPattern = /(\S*)(?:\s+(ascending|descending))?/;
+        match = endPattern.exec(query);
+        if(match === null)
+            return null;
+        clause[index.shift()] = match[1];
+        if(index[0] === "order")
+            clause[index.shift()] = match[3];
+
         return clause;
     }
 
@@ -151,7 +177,20 @@
         if(array === undefined)
             array = eval(clause.array);
         var execution = new Query(array);
-        execution.where(new Function(clause.parameter, "return " + clause.where));
+        if(clause.where !== undefined)
+            execution.where(new Function(clause.parameter, "return " + clause.where));
+
+        var order = undefined;
+        if(clause.order === root.ascending.value)
+            order = root.ascending;
+        else if(clause.order === root.descending.value)
+            order = root.descending;
+        else if(clause.order === undefined)
+            order = root.ascending;
+        else
+            return null;
+        if(clause.orderBy !== undefined)
+            execution.orderBy(new Function(clause.parameter, "return " + clause.orderBy), order);
         execution.select(new Function(clause.parameter, "return " + clause.select));
         return execution.all();
     }
