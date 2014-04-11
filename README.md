@@ -31,7 +31,7 @@ Supported Clauses
   In a query, select clause is used to do some operation of parameter.
   If multiple items are seleted, you need to make it into a object (or array) like:
   
-    JSIQ.query("select {"square" : i * i, "cube" : i * i * i} from i in a");
+    JSIQ.query('select {"square" : i * i, "cube" : i * i * i} from i in a');
 
 ### from in clause
   In a query, from in clause specify the array to query and the parameter name of item in this array.
