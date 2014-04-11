@@ -24,25 +24,50 @@
     root.ascending = new Order("ascending");
     root.descending = new Order("descending");
 
-    var Query = function(list) {
-        if(typeof(list) !== typeof([])) throw "Not array";
+    var Query = function(array) {
+        if(typeof(array) !== typeof([])) throw "Not array";
 
-        var result = list;
+        var result = [];
+        for(var i in array)
+            result.push([array[i]])
 
-        this.all = function(){
-            return result;
+
+
+        this.all = function() {
+            var unpack = [];
+            for(var i in result) {
+                if(result[i].length === 1)
+                    unpack.push(result[i][0]);
+                else
+                    return null;
+            }
+            return unpack;
         }
+
+        this.cross = function(array) {
+            var tempResult = [];
+            for(var i in result) {
+                for(var j in array) {
+                    var item = [];
+                    for(var k in result[i])
+                        item.push(result[i][k]);
+                    item.push(array[j]);
+                    tempResult.push(item);
+                }
+            }
+            result = tempResult;
+            return this;
+        }
+
+        this.from = this.cross;
 
         this.where = function(predicate){
             if(typeof(predicate) !== typeof(Function)) return null;
-            if(Array.prototype.filter !== undefined){
-                result = result.filter(predicate);
-                return this;
-            }
+
             var tempResult = [];
             for(var index in result){
                 var item = result[index];
-                if(predicate(item))
+                if(predicate.apply(this, item))
                     tempResult.push(item);
             }
             result = tempResult;
@@ -53,8 +78,8 @@
         this.select = function(selector){
             if(typeof(selector) !== typeof(Function)) return null;
             var tempResult = [];
-            for(var index in result){
-                tempResult.push(selector(result[index]));
+            for(var index in result) {
+                tempResult.push([selector.apply(this, result[index])]);
             }
             result = tempResult;
             return this;
@@ -80,7 +105,7 @@
             var index;
             var tempOrder = [];
             for(index in result)
-                tempOrder.push({"element":keySelector(result[index]),"index":index});
+                tempOrder.push({"element":keySelector.apply(this, result[index]),"index":index});
             tempOrder = tempOrder.sort(function(e1, e2){
                 if(order.value === root.ascending.value)
                     return comparer(e1.element, e2.element);
