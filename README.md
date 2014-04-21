@@ -29,7 +29,7 @@ Supported Clauses
 
 ### select clause
   In a query, select clause is used to do some operation of parameter.
-  If multiple items are seleted, you need to make it into a object (or array) like:
+  If multiple items are seleted, you need to make it into an object (or array) like:
   
     JSIQ.query('select {"square" : i * i, "cube" : i * i * i} from i in a');
 
@@ -40,4 +40,9 @@ Supported Clauses
 ### where clause
   In a query, where clause is used filter an array.
 
-
+### order by clause 
+  In a query, order by clause is used to sort an array.
+  Multiple key can be used to sort an array, and seperated by a comma(,).
+  The word "acending" and "descending" are used to indicate the order like
+  
+    JSIQ.query('select i from i in a order by i descending')
