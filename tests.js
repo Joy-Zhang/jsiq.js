@@ -79,3 +79,18 @@ test("join test", function() {
                          {"stuname": "li","svname":"li"}];
     deepEqual(result, expected_data, "Passed");
 });
+
+test("multi-order test", function(){
+    var grade = [{"id":1,"ch":95,"ma":92},
+                 {"id":3,"ch":94,"ma":97},
+                 {"id":4,"ch":93,"ma":91},
+                 {"id":5,"ch":96,"ma":91},
+                 {"id":2,"ch":96,"ma":95}];
+
+    var expected = [{"total":191,"ma":97},{"total":191,"ma":95},{"total":187,"ma":92},{"total":187,"ma":91},{"total":184,"ma":91}];
+
+    JSIQ.import("grade", grade);
+    var result = JSIQ.query('select {"total":i.ch+i.ma,"ma":i.ma} from i in grade order by i.ch+i.ma descending,i.ma descending');
+
+    deepEqual(result, expected, "Passed");
+});
