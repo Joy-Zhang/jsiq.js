@@ -7,7 +7,7 @@ Use
 -------
 
   Assume there is an array a = [1, 2, 3, 4, 5];
-  Before query it, this array need to be imported into JSIQ. Do this like:
+  Before querying it, the array needs to be imported into JSIQ. Do this like:
   
     JSIQ.import("a", a);
 
@@ -22,13 +22,13 @@ Use
   
     JSIQ.from(a).where(function(i) { return i > 3; }).select(function(i) { return i * i; }).all();
 
-  Please read the Supported Clauses section to know supported clauses at present.
+  Please read the Supported Clauses section to learn the supported clauses at present.
 
 Supported Clauses
 -----------------
 
 ### select clause
-  In a query, select clause is used to do some operation of parameter.
+  In a query, select clause is used to do some operations of parameter.
   If multiple items are seleted, you need to make it into an object (or array) like:
   
     JSIQ.query('select {"square" : i * i, "cube" : i * i * i} from i in a');
@@ -38,7 +38,7 @@ Supported Clauses
   This parameter can be used in other clauses.
 
 ### where clause
-  In a query, where clause is used filter an array.
+  In a query, where clause is used to filter an array.
 
 ### order by clause 
   In a query, order by clause is used to sort an array.
